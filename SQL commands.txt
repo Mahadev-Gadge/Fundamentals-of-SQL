@@ -1,0 +1,286 @@
+# SQL commands:
+
+************************************************************************************************************************************************************
+CREATE, USE, SOURCE, DESCRIBE commands:
+
+CREATE:
+Can be used to create database and table.
+Ex: CREATE database database_name or CREATE table table_name.
+
+USE:
+To use specific database.
+Ex: USE database_name
+
+SOURCE:
+To push db file to database.
+SOURCE file_name.
+
+DESCRIBE:
+To get the details of table, details are fields name, key, type and etc.
+DESCRIBE table_name
+
+************************************************************************************************************************************************************
+SELECT command:
+
+SELECT * FROM movies;
+
+SELECT name, year FROM movies;
+
+here * from all fields/attributes of a table, it can be computationally expensive when no of columns are more. Hence suggested to retrieve data(columns) which are requried.
+ 
+In this case result set preserves row order.
+
+************************************************************************************************************************************************************
+
+LIMIT, OFFSET command:
+
+SELECT name,rankscore FROM movies LIMIT 20;
+
+SELECT name,rankscore FROM movies LIMIT 20 OFFSET 40;
+
+LIMIT 20 gives only first 20 rows/tuples.
+
+OFFSET 40 means ignoring first 40 rows and retrieve 20 rows/tuples.
+
+************************************************************************************************************************************************************
+
+ORDER BY command:
+
+Which is equivalent to sorting, default sorting method is Ascending but descending can be achieved by expliciting mentioning DESC keyword.
+
+List recent movies first:
+SELECT movies, year FROM movies ORDER BY DESC;
+
+Row order is may not be same as one in table due to query optimizer and internal data structures.
+
+************************************************************************************************************************************************************
+
+DISTINCT command:
+
+single column:
+SELECT DISTINCT genre FROM movies_genres;
+
+multiple column:
+SELECT DISTINCT first_name, last_name FROM actors;
+
+************************************************************************************************************************************************************
+
+WHERE command:
+
+WHERE command is equivalent to condition.
+
+List all movies whose rankscore is greater than 9.
+SELECT name, rankscore FROM movies WHERE rankscore>9;
+
+SELECT name, rankscore FROM movies WHERE rankscore>9 ORDER BY rankscore DESC;
+
+Condition output can be TRUE, FALSE and NULL.
+
+Comparison operators:
+=, <> or !=, <, <=, >, >=
+
+SELECT * FROM movies_genres WHERE genre<>'Horror';
+
+In SQL NULL means unknown/missing/doesnot exist.
+
+'=' comparison operator doesn't work with NULL, it will return empty set.
+SELECT name, year, rankscore FROM movies WHERE rankscore = NULL;
+
+SELECT name,year,rankscore FROM movies WHERE rankscore IS NULL;
+
+SELECT name,year,rankscore FROM movies WHERE rankscore IS NOT NULL;
+
+************************************************************************************************************************************************************
+
+Logical operators:
+
+AND, OR, NOT, ALL, ANY, BETWEEN, EXISTS, IN, LIKE.
+
+SELECT name,year,rankscore FROM movies WHERE rankscore>9 AND year>2000;
+
+SELECT name,year,rankscore FROM movies WHERE NOT year<=2000 LIMIT 20;
+
+SELECT name,year,rankscore FROM movies WHERE rankscore>9 OR year>2007;
+
+SELECT name, year, rankscore FROM movies BETWEEN YEAR 1999 AND 2000; #inclusive: year>=1999 and year<=2000
+
+SELECT director_id, genre FROM directors_genres WHERE genre IN ('Comedy','Horror');
+above query is equivalent to below query.
+SELECT director_id, genre FROM direcors_genres WHERE genre='Comedy' OR genre='Horror';
+
+SELECT name, year FROM movies WHERE name LIKE '%es';
+SELECT name, year FROM movies WHERE name LIKE '%es%';
+SELECT name, year FROM movies WHERE name LIKE 'es%';
+SELECT name, year FROM movies WHERE name LIKE 'MAHADE_';
+
+In SQL % and _ are wildcard characters. % means any number of characters and - single character. This SQL functionality is same as pattern matching(regular expressions in Python).
+
+If we want to match % or _, we should use the backslash as the escape character: \% and \_.
+
+************************************************************************************************************************************************************
+
+Aggregate functions:
+COUNT, MIN, MAX, SUM, AVG
+
+SELECT COUNT(year) FROM movies;
+
+SELECT name, COUNT(year) movie_count FROM movies GROUP BY year;
+
+SELECT MIN(year) FROM movies;
+
+SELECT MAX(year) FROM movies;
+
+************************************************************************************************************************************************************
+
+GROUP BY command:
+
+find number of movies released per year?
+SELECT year, COUNT(year) FROM movies GROUP BY year;
+
+SELECT year, COUNT(year) FROM movies GROUP BY year ORDER BY year;
+
+If grouping columns contain NULL values, all null values are grouped together.
+
+************************************************************************************************************************************************************
+
+HAVING command:
+
+SELECT year, COUNT(year) movie_count FROM movies GROUP BY year HAVING movie_count>1000;
+
+specify a condition on groups using HAVING.
+
+Order of execution:
+1. GROUP BY to create groups
+2. apply the AGGREGATE FUNCTION
+3. Apply HAVING condition.
+
+HAVING command often used with GROUP BY command but not manditory.
+HAVING without GROUP BY is same as WHERE.
+
+SELECT year, COUNT(year) year_count FROM movies WHERE rankscore>9 GROUP BY year HAVING year_count>20;
+
+Main difference between HAVING and WHERE is HAVING is applied after grouping and WHERE is applied on individual rows.
+
+************************************************************************************************************************************************************
+
+JOIN:
+
+Combining multiple tables
+
+SELECT m.name, g.genre FROM movies m JOIN movies_genres g on m.id=g.movie_id LIMIT 10; 
+Here JOIN means Inner join which is equivalent to intersection in set theory.
+
+Natural Join:
+A join where we have the same column-names across two tables.
+T1: C1, C2
+T2: C1, C3, C4
+
+SELECT * FROM T1 JOIN T2; 
+SELECT * FROM T1 JOIN T2 USING(C1);
+ 
+returns tables having columns C1,C2,C3,C4
+
+There are two types of Join.
+1.Inner Join
+2.Outer Join(Left, right, full), while joining tables if value found to be empty then SQL will fill that place by NULL keyword.
+
+We can do 3 ways join and n-ways of joining.
+SELECT a.first_name, a.last_name FROM actors a JOIN roles r ON a.id=r.actor_id JOIN movies m on m.id=r.movie_id AND m.name='Officer 444';
+
+Note:Joining tables is expensive when there is large tables, instead subquieries can be used.
+
+************************************************************************************************************************************************************
+
+There are mainly 3 types of languages in SQL.
+1.Data definition language.
+2.Data manipulation language.
+3.Data control language.
+
+1.Data definition language:
+Here we many deal with table creation, attribute/field addition and deletion.
+
+Important DDL commands are CREATE, ALTER, DROP.
+
+CREATE table table_name;
+Ex: CREATE table language(id Int PRIMARY, name VARCHAR(50) NOT NULL);
+
+meaning of above query is:
+Table name-language
+columns-id(type-Integer and PRIMARY key) and name(type-Varchar(50) and value cannot be NULL).
+
+Datatypes: https://www.journaldev.com/16774/sql-data-types
+Constraints: https://www.w3schools.com/sql/sql_constraints.asp
+
+ALTER command;
+We can ADD, MODIFY and DROP columns using ALTER command.
+
+ALTER table table_name ADD column_name(constraints);
+ALTER table language ADD name(VARCHAR 50);
+
+ALTER table table_name MODIFY column_name(constraints);
+ALTER table language MODIFY name(VARCHAR 60);
+ 
+ALTER table table_name DROP column_name;
+ALTER table language MODIFY name;
+
+DROP Table table_name;
+Above query drops entire table.
+
+************************************************************************************************************************************************************
+
+2.Data manipulation language:
+
+Important DML commands are SELECT, INSERT, UPDATE, DELETE.
+
+INSERT command:
+
+INSERT INTO table_name(id, name, year, rankscore) VALUES(123, "Mahadev", 1996, 87);
+add single row/tuple/record.
+
+INSERT INTO table_name(id, name, year, rankscore) VALUES(123, "Mahadev", 1996, 87), (125, "Mahadeva", 1997, 83);
+add multiple row/tuple/record.
+
+We can copy rows from other tables also.
+source:https://en.wikipedia.org/wiki/Insert_(SQL)
+INSERT INTO table_name(name, number) SELECT name, number FROM phone_book WHERE name IN ('Mahadev', 'Mahadeva');
+
+UPDATE command:
+
+UPDATE table_name SET field_name=value WHERE id=143;
+
+UPDATE table_name SET field_name1=value, field_name2=value WHERE id=143;
+
+
+DELETE command:
+
+DELETE FROM table_name WHERE id=143;
+Above query will delete single row.
+
+DELETE FROM table_name;
+Above query deletes entire table data but not structure.
+
+TRUNCATE table table_name;
+Delete entire table data but not structutre which is same as DELETE when no WHERE clause.
+
+************************************************************************************************************************************************************
+
+3.Data Control languages:
+Important commands are GRANT and REVOKE.
+
+https://en.wikipedia.org/wiki/Data_control_language
+https://dev.mysql.com/doc/refman/8.0/en/grant.html
+https://dev.mysql.com/doc/refman/8.0/en/revoke.html
+
+Mainly used to control or manage databases by providing requried access to required persons.
+Ex: Banking sector - credit card information won't be needed to ML/DS engineer and similarly customer personal details are not required for SDE. This way DBMS provides security and access control to Database. 
+
+
+
+
+
+
+
+
+
+
+
