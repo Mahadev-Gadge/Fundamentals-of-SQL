@@ -1,2 +1,1 @@
-# Fundamentals-of-SQL
-SQL for Datascience 
+This repo contains about SQL for Datascience beginners.
